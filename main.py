@@ -1,5 +1,7 @@
 from flask import Flask, request, redirect, render_template, flash, session
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from sqlalchemy import desc
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -13,10 +15,12 @@ class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
     body = db.Column(db.String(1500))
+    pub_date = db.Column(db.DateTime)
 
     def __init__(self, title, body):
         self.title = title
         self.body = body
+        self.pub_date = datetime.utcnow()
 
 #redirect route to blog page from main index page
 @app.route('/')
@@ -39,7 +43,7 @@ def blog():
 
     #if no post selected, show all posts
     else:
-        blogs = Blog.query.all()
+        blogs = Blog.query.order_by(desc(Blog.pub_date)).all()
         return render_template('blog.html', title="Build a Blog", blogs=blogs)
 
 
